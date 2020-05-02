@@ -1,0 +1,12 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Type=Application
+Name=Spotify
+Exec=spotify %U
+Comment=
+StartupWMClass=Spotify
+Keywords=docker x11docker Spotify 
+Icon=x11docker-%%REPONAME%%-%%APPNAME%%-%%TAG%%.png
+Terminal=false
+MimeType=x-scheme-handler/spotify
+X-KDE-Protocols=spotify
