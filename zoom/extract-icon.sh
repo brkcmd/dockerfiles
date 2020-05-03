@@ -1,0 +1,1 @@
+../extract-icon.sh
