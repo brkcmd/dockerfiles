@@ -10,19 +10,29 @@ if [ "$(docker container ls -q -f name=x11docker-%%REPONAME%%-%%APPNAME%%-%%TAG%
     fi
 else
     declare DOCUMENTS_DIR="$(xdg-user-dir DOCUMENTS)/Zoom"
+    declare DBUS_PROXY_PATH="${XDG_RUNTIME_DIR?XDG_RUNTIME_DIR not set}/.dbus-proxy/x11docker-%%REPONAME%%-%%APPNAME%%-bus"
     mkdir -p "${DOCUMENTS_DIR}"
-    exec x11docker \
+    xdg-dbus-proxy \
+        "${DBUS_SESSION_BUS_ADDRESS:?No DBus session bus detected.}" "${DBUS_PROXY_PATH}" --filter \
+        --call=org.freedesktop.portal.Desktop.*=* \
+        --broadcast=org.freedesktop.portal.Desktop.*=@/org/freedesktop/portal/desktop/* \
+        &  # run proxy in background
+    declare proxy_pid=$!
+    x11docker \
         --user=RETAIN \
         --pulseaudio \
         --webcam \
         --clipboard \
         --hostdisplay \
-        --hostdbus \
         --name x11docker-%%REPONAME%%-%%APPNAME%%-%%TAG%% \
         -- \
             --mount type=volume,src=x11docker-home-%%REPONAME%%-%%APPNAME%%-%%TAG%%,dst=%%HOMEDIR%% \
             --mount "type=bind,src=${DOCUMENTS_DIR},dst=%%HOMEDIR%%/Documents/Zoom" \
+            --mount "type=bind,src=${DBUS_PROXY_PATH},dst=/run/user/1000/bus,readonly" \
+            --env DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/1000/bus" \
         -- \
             %%REPONAME%%/%%APPNAME%%:%%TAG%% \
             "$@"
+    kill "$proxy_pid"
+    wait  # ensure proxy has exited
 fi
