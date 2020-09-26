@@ -9,11 +9,15 @@ if [ "$(docker container ls -q -f name=x11docker-%%REPONAME%%-%%APPNAME%%-%%TAG%
         docker exec x11docker-%%REPONAME%%-%%APPNAME%%-%%TAG%% %%EXE%% "$@"
     fi
 else
-    declare DOCUMENTS_DIR="$(xdg-user-dir DOCUMENTS)/Zoom"
-    declare DBUS_PROXY_PATH="${XDG_RUNTIME_DIR?XDG_RUNTIME_DIR not set}/.dbus-proxy/x11docker-%%REPONAME%%-%%APPNAME%%-bus"
+    XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-${HOME}/.config}"
+    DOCUMENTS_DIR="$(xdg-user-dir DOCUMENTS)/Zoom"
     mkdir -p "${DOCUMENTS_DIR}"
+    DBUS_PROXY_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/.dbus-proxy"
+    mkdir -p "${DBUS_PROXY_DIR}"
+    DBUS_PROXY_PATH="${DBUS_PROXY_DIR}/x11docker-%%REPONAME%%-%%APPNAME%%-bus"
     xdg-dbus-proxy \
-        "${DBUS_SESSION_BUS_ADDRESS:?No DBus session bus detected.}" "${DBUS_PROXY_PATH}" --filter \
+        "${DBUS_SESSION_BUS_ADDRESS:?No DBus session bus detected.}" "${DBUS_PROXY_PATH}" \
+        --filter \
         --call=org.freedesktop.portal.Desktop.*=* \
         --broadcast=org.freedesktop.portal.Desktop.*=@/org/freedesktop/portal/desktop/* \
         &  # run proxy in background
