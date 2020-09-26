@@ -1,4 +1,4 @@
-#/usr/bin/env bash
+#!/usr/bin/env bash
 
 if [ "$(docker container ls -q -f name=x11docker-%%REPONAME%%-%%APPNAME%%-%%TAG%%)" != "" ]; then
     if [ "$#" -eq 1 ]; then
