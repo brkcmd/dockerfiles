@@ -21,7 +21,7 @@ else
         --call=org.freedesktop.portal.Desktop.*=* \
         --broadcast=org.freedesktop.portal.Desktop.*=@/org/freedesktop/portal/desktop/* \
         &  # run proxy in background
-    declare proxy_pid=$!
+    proxy_pid=$!
     x11docker \
         --user=RETAIN \
         --pulseaudio \
